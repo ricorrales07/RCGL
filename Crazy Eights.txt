@@ -1,0 +1,54 @@
+#CRAZY EIGHTS
+
+setup:
+
+	players: 2-5
+	each_player_has: {
+		private hand Hand
+	}
+
+	faceup stack Main
+	facedown stack Stock
+
+	deal 5 from Deck among Players.Hand
+	do {
+		deal 1 from Deck among Main
+		if (Main.top.rank == 8) {
+			move 1 from Main to random on Deck
+		}
+	} while (Main.empty)
+		
+	deal all from Deck among [Stock]
+
+phase 1:
+
+	turns
+	player_order: random
+	let EightSuit
+	let EndOfTUrn = false
+
+	while (!EndOfTurn) {
+
+		if (!Hand.has_equal(rank, 8) and !Hand.has_equal(rank, Main.top.rank) and !Hand.has_equal(suit, Main.top.suit) and Stock.empty) {
+			EndOfTurn = true
+			break
+		}
+
+		optional DrawFromStock: {
+
+			move 1 from Stock.top to Hand
+
+		}
+
+		optional DiscardIntoMain: {
+
+			card Card1 = select 1 from Hand
+			if (Card1.rank == Main.top.rank or Card1.suit == Main.top.suit or Card1.rank == 8) {
+				move Card1 from Hand to Main.top
+				if (Card1.rank == 8) {
+					eight_suit = This_player.choose(suit)
+				}
+				EndOfTurn = true
+			}
+		}
+	}

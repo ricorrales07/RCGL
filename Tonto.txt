@@ -1,0 +1,47 @@
+#TONTO
+
+setup:
+
+	players: 2-6
+	each_player_has: {
+		private hand #con solo escribir "hand" se asume que existe una variable especial que representa la mano y se llama "Hand"
+	}
+
+	faceup stack Pairs
+	deal all from Deck among Players.Hands
+
+phase 1:
+
+	no_turns
+	
+	global optional MakePair: {
+
+		card Card1 = select 1 from Hand
+		card Card2 = select 1 from Hand #select debería prohibirme seleccionar la misma dos veces
+		if (Card1.rank == Card2.rank) {
+			move Card1 from Hand to Pairs
+			move Card2 from Hand to Pairs
+		}
+
+	}
+
+	end_condition: all_players.Hand.has_equal(rank, 2)
+
+phase 2:
+
+	turns
+	player_order: descendent on Hand.size
+
+	mandatory Steal: {
+
+		card NewCard = move 1 from Next_player.Hand to Hand
+		if (Next_player.Hand.empty)
+			Next_player.out()
+
+	}
+
+	optional MakePair
+
+	end_condition: Players.count == 1
+
+win_condition: This_player.in
